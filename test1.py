@@ -117,7 +117,7 @@ class Net(nn.Module):
             input_size: (1,28,28)
             num_classes: 10
         """
-        super(CNN, self).__init__()
+        super(Net, self).__init__()
         
         self.layer1 = nn.Sequential(
             nn.Conv2d(input_size[0], 32, kernel_size=5),
