@@ -45,7 +45,7 @@ class Arguments():
         self.images = 10000
         self.clients = 30
         self.rounds = 60
-        self.epochs = 5
+        self.epochs = 3
         self.local_batches = 64
         self.lr = 0.01
         self.C = 1 #fraction of clients used in the round
@@ -91,58 +91,25 @@ global_test_dataset = datasets.MNIST('./', train=False, download=True, transform
 global_test_loader = DataLoader(global_test_dataset, batch_size=args.local_batches, shuffle=True)
 
 class Net(nn.Module):
-##    def __init__(self):
-##        super(Net, self).__init__()
-##        #self.quant = torch.quantization.QuantStub()
-##        self.conv1 = nn.Conv2d(1, 5, 5, 1)
-##        self.conv2 = nn.Conv2d(5, 10, 5, 1)
-##        self.fc1 = nn.Linear(4*4*10, 20)
-##        self.fc2 = nn.Linear(20, 10)
-##
-##    def forward(self, x):
-##        #x=self.quant(x)
-##        x = F.relu(self.conv1(x))
-##        x = F.max_pool2d(x, 2, 2)
-##        x = F.relu(self.conv2(x))
-##        x = F.max_pool2d(x, 2, 2)
-##        x = x.view(-1, 4*4*10
-##                   )
-##        x = F.relu(self.fc1(x))
-##        x = self.fc2(x)
-##        return F.log_softmax(x, dim=1)
-    def __init__(self, input_size, num_classes):
-        """
-        init convolution and activation layers
-        Args:
-            input_size: (1,28,28)
-            num_classes: 10
-        """
+    def __init__(self):
         super(Net, self).__init__()
-        
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(input_size[0], 32, kernel_size=5),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2))
-        
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=5),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2))
+        #self.quant = torch.quantization.QuantStub()
+        self.conv1 = nn.Conv2d(1, 5, 5, 1)
+        self.conv2 = nn.Conv2d(5, 10, 5, 1)
+        self.fc1 = nn.Linear(4*4*10, 20)
+        self.fc2 = nn.Linear(20, 10)
 
-        self.fc1 = nn.Linear(4 * 4 * 64, num_classes)
-        
-    
     def forward(self, x):
-        """
-        forward function describes how input tensor is transformed to output tensor
-        Args:
-            x: (Nx1x28x28) tensor
-        """
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = x.reshape(x.size(0), -1)
-        x = self.fc1(x)
-        return x
+        #x=self.quant(x)
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = x.view(-1, 4*4*10
+                   )
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1)
     
 def ClientUpdate(args, device, client,key_np,key,snr,csi,mu):
     gc=False
@@ -279,7 +246,7 @@ torch.manual_seed(args.torch_seed)
 
 for client in clients: #give the model and optimizer to every client
     torch.manual_seed(args.torch_seed)
-    client['model'] = Net((1, 28, 28), 10).to(device)
+    client['model'] = Net().to(device)
     #client['model'] = torch.quantization.quantize_dynamic(
     #client['model'],  # the original model
     #{torch.nn.Linear},  # a set of layers to dynamically quantize
